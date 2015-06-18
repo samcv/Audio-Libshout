@@ -26,7 +26,8 @@ class Audio::Libshout {
 
         }
 
-
+        # "attributes"
+        #
         sub shout_set_host(Shout, Str) returns int32 is native('libshout') { * }
         sub shout_get_host(Shout) returns Str is native('libshout') { * }
 
@@ -46,6 +47,31 @@ class Audio::Libshout {
         sub shout_get_pass(Shout) returns Str is native('libshout') { * }
 
         method pass() returns Str is rw is accessor_facade(&shout_get_pass, &shout_set_pass, &manage, &check) { }
+
+        sub shout_get_protocol(Shout) returns int32 is native('libshout') { * }
+        sub shout_set_protocol(Shout, int32) returns int32 is native('libshout') { * }
+
+        method protocol() returns Int is rw is accessor_facade(&shout_get_protocol, &shout_set_protocol, Code, &check) { }
+
+        sub shout_get_format(Shout) returns int32 is native('libshout') { * }
+        sub shout_set_format(Shout, int32) returns int32 is native('libshout') { * }
+
+        method format() returns Int is rw is accessor_facade(&shout_get_format, &shout_set_format, Code, &check) { }
+
+        sub shout_get_mount(Shout) returns int32 is native('libshout') { * }
+        sub shout_set_mount(Shout, Str) returns int32 is native('libshout') { * }
+
+        method mount() returns Str is rw is accessor_facade(&shout_get_mount, &shout_set_mount, &manage, &check) { }
+
+        sub shout_get_dumpfile(Shout) returns Str is native('libshout') { * }
+        sub shout_set_dumpfile(Shout, Str ) returns int32 is native('klibshout') { * }
+
+        method dumpfile() returns Str is rw is accessor_facade(&shout_get_dumpfile, &shout_set_dumpfile, &manage, &check ) { }
+
+        sub shout_get_agent(Shout) returns Str is native('libshout') { * }
+        sub shout_set_agent(Shout, Str) returns int32 is native('libshout') { * }
+
+        method agent() returns Str is rw is accessor_facade(&shout_get_agent, &shout_set_agent, &manage, &check) { }
     }
 
     sub shout_init() is native('libshout') { * }
