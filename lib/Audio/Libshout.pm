@@ -72,6 +72,37 @@ class Audio::Libshout {
         sub shout_set_agent(Shout, Str) returns int32 is native('libshout') { * }
 
         method agent() returns Str is rw is accessor_facade(&shout_get_agent, &shout_set_agent, &manage, &check) { }
+
+        # Directory parameters
+        sub shout_get_public(Shout) returns int32 is native('libshout') { * }
+        sub shout_set_public(Shout, int32) returns int32 is native('libshout') { * }
+
+        method public returns Int is rw is accessor_facade(&shout_get_public, &shout_set_public, Code, &check) { }
+
+        sub shout_get_name(Shout) returns Str is native('libshout') { * }
+        sub shout_set_name(Shout, Str) returns int32 is native('libshout') { * }
+
+        method name() returns Str is rw is accessor_facade(&shout_get_name, &shout_set_name, &manage, &check) { }
+
+        sub shout_get_url(Shout) returns Str is native('libshout') { * }
+        sub shout_set_url(Shout, Str) returns int32 is native('libshout') { * }
+
+        method url() returns Str is rw is accessor_facade(&shout_get_url, &shout_set_url, &manage, &check) { }
+
+        sub shout_get_genre(Shout) returns Str is native('libshout') { * }
+        sub shout_set_genre(Shout, Str) returns int32 is native('libshout') { * }
+
+        method genre() returns Str is rw is accessor_facade(&shout_get_genre, &shout_set_genre, &manage, &check) { }
+
+        sub shout_get_description(Shout) returns Str is native('libshout') { * }
+        sub shout_set_description(Shout, Str) returns int32 is native('libshout') { * }
+
+        method description() returns Str is rw is accessor_facade(&shout_get_description, &shout_set_description, &manage, &check) { }
+
+        # Not making a method for these quite yet.
+        sub shout_get_audio_info(Shout, Str) returns Str is native('libshout') { * }
+        sub shout_set_audio_info(Shout, Str, Str) returns Str is native('libshout') { * }
+
     }
 
     sub shout_init() is native('libshout') { * }
