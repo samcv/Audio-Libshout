@@ -3,6 +3,11 @@ use NativeCall;
 use AccessorFacade;
 
 class Audio::Libshout {
+
+    class Metadata is repr('CPointer') {
+        sub shout_metadata_add(Metadata, Str, Str ) returns int32 is native('libshout') { * }
+    }
+
     class Shout is repr('CPointer') {
 
         sub shout_open(Shout) returns int32 is native('libshout') { * }
@@ -103,6 +108,13 @@ class Audio::Libshout {
         sub shout_get_audio_info(Shout, Str) returns Str is native('libshout') { * }
         sub shout_set_audio_info(Shout, Str, Str) returns Str is native('libshout') { * }
 
+        # Set the metadata on this instance.
+
+        sub shout_set_metadata(Shout, Metadata) returns int32 is native('libshout') { * }
+
+        method set_metadata(Metadata $meta) {
+            my $rc = shout_set_metadata(self, $meta);
+        }
     }
 
     sub shout_init() is native('libshout') { * }
@@ -110,15 +122,18 @@ class Audio::Libshout {
     sub shout_shutdown() is native('libshout') { * }
 
     sub shout_new() returns Shout is native('libshout') { * }
+    sub shout_free(Shout) returns int32 is native('libshout') { * }
 
     has Shout $!shout handles <host>;
+
+    sub shout_metadata_new() returns Metadata is native('libshout') { * }
+    sub shout_metadata_free(Metadata) is native('libshout') { * }
 
     multi submethod BUILD() {
         shout_init();
         $!shout = shout_new();
     }
 
-    sub shout_free(Shout) returns int32 is native('libshout') { * }
 }
 
 # vim: expandtab shiftwidth=4 ft=perl6
