@@ -21,6 +21,24 @@ class Audio::Libshout {
         method close() returns Int {
             shout_close(self);
         }
+        
+        sub shout_send(Shout, CArray[uint8], int32) returns int32 is native('libshout') { * }
+
+        multi method send(CArray[uint8] $buf) returns int32 {
+            shout_send(self, $buf, $buf.elems);
+        }
+
+        multi method send(Buf $buf) returns Int {
+            my $carray = CArray[uint8].new;
+            $carray[$_] = $buf[$_] for ^$buf.elems;
+            self.send($carray);
+        }
+
+        sub shout_sync(Shout) returns int32 is native('libshout') { * }
+
+        method sync() {
+            shout_sync(self);
+        }
 
         my sub manage(Shout $self, Str $value is copy) {
             explicitly-manage($value);
