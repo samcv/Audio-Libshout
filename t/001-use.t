@@ -8,3 +8,4 @@ use-ok('Audio::Libshout', 'can use Libshout');
 
 
 done;
+# vim: expandtab shiftwidth=4 ft=perl6
