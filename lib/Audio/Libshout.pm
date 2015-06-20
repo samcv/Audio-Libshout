@@ -70,28 +70,28 @@ class Audio::Libshout {
 
         method user() returns Str is rw is accessor_facade(&shout_get_user, &shout_set_user, &manage, &check) { }
 
-        sub shout_set_pass(Shout, Str) returns int32 is native('libshout') { * }
-        sub shout_get_pass(Shout) returns Str is native('libshout') { * }
+        sub shout_set_password(Shout, Str) returns int32 is native('libshout') { * }
+        sub shout_get_password(Shout) returns Str is native('libshout') { * }
 
-        method pass() returns Str is rw is accessor_facade(&shout_get_pass, &shout_set_pass, &manage, &check) { }
+        method password() returns Str is rw is accessor_facade(&shout_get_password, &shout_set_password, &manage, &check) { }
 
         sub shout_get_protocol(Shout) returns int32 is native('libshout') { * }
         sub shout_set_protocol(Shout, int32) returns int32 is native('libshout') { * }
 
-        method protocol() returns Int is rw is accessor_facade(&shout_get_protocol, &shout_set_protocol, Code, &check) { }
+        method protocol() returns Protocol() is rw is accessor_facade(&shout_get_protocol, &shout_set_protocol, Code, &check) { }
 
         sub shout_get_format(Shout) returns int32 is native('libshout') { * }
         sub shout_set_format(Shout, int32) returns int32 is native('libshout') { * }
 
-        method format() returns Int is rw is accessor_facade(&shout_get_format, &shout_set_format, Code, &check) { }
+        method format() returns Format() is rw is accessor_facade(&shout_get_format, &shout_set_format, Code, &check) { }
 
-        sub shout_get_mount(Shout) returns int32 is native('libshout') { * }
+        sub shout_get_mount(Shout) returns Str is native('libshout') { * }
         sub shout_set_mount(Shout, Str) returns int32 is native('libshout') { * }
 
         method mount() returns Str is rw is accessor_facade(&shout_get_mount, &shout_set_mount, &manage, &check) { }
 
         sub shout_get_dumpfile(Shout) returns Str is native('libshout') { * }
-        sub shout_set_dumpfile(Shout, Str ) returns int32 is native('klibshout') { * }
+        sub shout_set_dumpfile(Shout, Str ) returns int32 is native('libshout') { * }
 
         method dumpfile() returns Str is rw is accessor_facade(&shout_get_dumpfile, &shout_set_dumpfile, &manage, &check ) { }
 
@@ -146,14 +146,17 @@ class Audio::Libshout {
     sub shout_new() returns Shout is native('libshout') { * }
     sub shout_free(Shout) returns int32 is native('libshout') { * }
 
-    has Shout $!shout handles <host>;
+    has Shout $!shout handles <host port user password protocol format mount dumpfile agent public name url genre description>;
 
     sub shout_metadata_new() returns Metadata is native('libshout') { * }
     sub shout_metadata_free(Metadata) is native('libshout') { * }
 
     sub shout_version(int32, int32, int32) returns Str is native('libshout') { * }
     method libshout-version() returns Version {
-        my $v = shout_version(int32, int32, int32);
+        my int32 $major;
+        my int32 $minor;
+        my int32 $patch;
+        my $v = shout_version($major, $minor, $patch);
         Version.new($v);
     }
     multi submethod BUILD() {
