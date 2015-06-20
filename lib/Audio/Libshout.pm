@@ -4,6 +4,10 @@ use AccessorFacade;
 
 class Audio::Libshout {
 
+    enum Error ( Success => 0 , Insane => -1 , Noconnect => -2 , Nologin => -3 , Socket => -4 , Malloc => -5, Meta => -6, Connected => -7, Unconnected => -8, Unsupported => -9, Busy => -10 );
+    enum Format ( Ogg => 0, MP3 => 1 );
+    enum Protocol ( HTTP => 0, XAUDIOCAST => 1, ICY => 2);
+
     class Metadata is repr('CPointer') {
         sub shout_metadata_add(Metadata, Str, Str ) returns int32 is native('libshout') { * }
     }
@@ -147,6 +151,11 @@ class Audio::Libshout {
     sub shout_metadata_new() returns Metadata is native('libshout') { * }
     sub shout_metadata_free(Metadata) is native('libshout') { * }
 
+    sub shout_version(int32, int32, int32) returns Str is native('libshout') { * }
+    method libshout-version() returns Version {
+        my $v = shout_version(int32, int32, int32);
+        Version.new($v);
+    }
     multi submethod BUILD() {
         shout_init();
         $!shout = shout_new();
