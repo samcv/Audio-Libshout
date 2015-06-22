@@ -137,6 +137,18 @@ class Audio::Libshout {
         method set_metadata(Metadata $meta) {
             my $rc = shout_set_metadata(self, $meta);
         }
+
+        sub shout_get_error(Shout) returns Str is native('libshout') { * };
+
+        method last-error() returns Str {
+            shout_get_error(self);
+        }
+
+        sub shout_get_errno(Shout) returns int32 is native('libshout') { * };
+
+        method last-error-number() returns Int {
+            shout_get_errno(self);
+        }
     }
 
     sub shout_init() is native('libshout') { * }
