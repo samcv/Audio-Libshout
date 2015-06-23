@@ -1,6 +1,7 @@
 use v6;
 use NativeCall;
 use AccessorFacade:ver<v0.0.2>;
+use OO::Monitors;
 
 class Audio::Libshout {
 
@@ -163,26 +164,30 @@ class Audio::Libshout {
         }
     }
 
-    my Int $initialisers = 0;
+    monitor Initialiser {
+        has Int $!initialisers = 0;
 
-    sub shout_init() is native('libshout') { * }
+        sub shout_init() is native('libshout') { * }
 
-    method init() {
-        if $initialisers == 0 {
-            shout_init();
+        method init() {
+            if $!initialisers == 0 {
+                shout_init();
+            }
+            ++$!initialisers;
         }
-        ++$initialisers;
+
+        sub shout_shutdown() is native('libshout') { * }
+
+        method shutdown() {
+            --$!initialisers;
+            if $!initialisers == 0 {
+                shout_shutdown();
+            }
+        }
     }
 
-    sub shout_shutdown() is native('libshout') { * }
 
-    method shutdown() {
-        --$initialisers;
-        if $initialisers == 0 {
-            shout_shutdown();
-        }
-    }
-
+    my $initialiser = Initialiser.new;
 
     has Shout $!shout handles <host port user password protocol format mount dumpfile agent public name url genre description>;
 
@@ -199,13 +204,13 @@ class Audio::Libshout {
     }
 
     multi submethod BUILD() {
-        self.init();
+        $initialiser.init();
         $!shout = Shout.new;
     }
 
     submethod DESTROY() {
         $!shout = Shout;
-        self.shutdown();
+        $initialiser.shutdown();
     }
 
 }
