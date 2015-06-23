@@ -14,6 +14,18 @@ class Audio::Libshout {
 
     class Shout is repr('CPointer') {
 
+        sub shout_new() returns Shout is native('libshout') { * }
+
+        method new(Shout:U:) returns Shout {
+            shout_new();
+        }
+
+        sub shout_free(Shout) returns int32 is native('libshout') { * }
+
+        submethod DESTROY() {
+            shout_free(self);
+        }
+
         sub shout_open(Shout) returns int32 is native('libshout') { * }
 
         method open() returns Int {
@@ -171,9 +183,6 @@ class Audio::Libshout {
         }
     }
 
-    sub shout_new() returns Shout is native('libshout') { * }
-
-    sub shout_free(Shout) returns int32 is native('libshout') { * }
 
     has Shout $!shout handles <host port user password protocol format mount dumpfile agent public name url genre description>;
 
@@ -188,9 +197,15 @@ class Audio::Libshout {
         my $v = shout_version($major, $minor, $patch);
         Version.new($v);
     }
+
     multi submethod BUILD() {
         self.init();
-        $!shout = shout_new();
+        $!shout = Shout.new;
+    }
+
+    submethod DESTROY() {
+        $!shout = Shout;
+        self.shutdown();
     }
 
 }
