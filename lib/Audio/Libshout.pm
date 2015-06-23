@@ -151,11 +151,28 @@ class Audio::Libshout {
         }
     }
 
+    my Int $initialisers = 0;
+
     sub shout_init() is native('libshout') { * }
+
+    method init() {
+        if $initialisers == 0 {
+            shout_init();
+        }
+        ++$initialisers;
+    }
 
     sub shout_shutdown() is native('libshout') { * }
 
+    method shutdown() {
+        --$initialisers;
+        if $initialisers == 0 {
+            shout_shutdown();
+        }
+    }
+
     sub shout_new() returns Shout is native('libshout') { * }
+
     sub shout_free(Shout) returns int32 is native('libshout') { * }
 
     has Shout $!shout handles <host port user password protocol format mount dumpfile agent public name url genre description>;
@@ -172,7 +189,7 @@ class Audio::Libshout {
         Version.new($v);
     }
     multi submethod BUILD() {
-        shout_init();
+        self.init();
         $!shout = shout_new();
     }
 
