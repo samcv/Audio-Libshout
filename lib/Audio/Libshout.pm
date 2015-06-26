@@ -94,7 +94,7 @@ class Audio::Libshout {
             self.send($carray);
         }
 
-        sub shout_sync(Shout) returns int32 is native('libshout') { * }
+        sub shout_sync(Shout) is native('libshout') { * }
 
         method sync() {
             shout_sync(self);
