@@ -9,6 +9,49 @@ class Audio::Libshout {
     enum Format ( Ogg => 0, MP3 => 1 );
     enum Protocol ( HTTP => 0, XAUDIOCAST => 1, ICY => 2);
 
+    class X::ShoutError is Exception {
+        has Error $.error;
+
+        method message() {
+            given $!error {
+                when Insane {
+                    "Not a valid Shout object or missing parameters";
+                }
+                when Noconnect {
+                    "A connection to the server could not be established."
+                }
+                when Nologin {
+                    "The server refused login, probably because authentication failed.";
+                }
+                when Socket {
+                    "An error occured while talking to the server.";
+                }
+                when Malloc {
+                    "There wasn't enough memory to complete the operation.";
+                }
+                when Meta {
+                    "The server returned an error while setting metadata.";
+                }
+                when Connected {
+                    "The connection has already been opened."
+                }
+                when Unconnected {
+                    "The Shout object is not currently connected";
+                }
+                when Unsupported {
+                    "The combination of parameters is not supported for this operation";
+                }
+                when Busy {
+                    "The connection is busy and could not perform the operation.";
+                }
+                default {
+                    "Unknown issue or not an error";
+                }
+
+            }
+        }
+    }
+
     class Metadata is repr('CPointer') {
         sub shout_metadata_add(Metadata, Str, Str ) returns int32 is native('libshout') { * }
     }
@@ -63,6 +106,13 @@ class Audio::Libshout {
         }
 
         my sub check(Shout $self, Int $rc ) {
+            given Error($rc) {
+                when Success {
+                }
+                default {
+                    X::ShoutError.new(error => $_).throw;
+                }
+            }
 
         }
 
