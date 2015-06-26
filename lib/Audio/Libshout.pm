@@ -11,44 +11,46 @@ class Audio::Libshout {
 
     class X::ShoutError is Exception {
         has Error $.error;
+        has Str $.what = "unknown operation";
 
         method message() {
-            given $!error {
-                when Insane {
-                    "Not a valid Shout object or missing parameters";
-                }
-                when Noconnect {
-                    "A connection to the server could not be established."
-                }
-                when Nologin {
-                    "The server refused login, probably because authentication failed.";
-                }
-                when Socket {
-                    "An error occured while talking to the server.";
-                }
-                when Malloc {
-                    "There wasn't enough memory to complete the operation.";
-                }
-                when Meta {
-                    "The server returned an error while setting metadata.";
-                }
-                when Connected {
-                    "The connection has already been opened."
-                }
-                when Unconnected {
-                    "The Shout object is not currently connected";
-                }
-                when Unsupported {
-                    "The combination of parameters is not supported for this operation";
-                }
-                when Busy {
-                    "The connection is busy and could not perform the operation.";
-                }
-                default {
-                    "Unknown issue or not an error";
-                }
+            my $message = do given $!error {
+                                when Insane {
+                                    "Not a valid Shout object or missing parameters";
+                                }
+                                when Noconnect {
+                                    "A connection to the server could not be established."
+                                }
+                                when Nologin {
+                                    "The server refused login, probably because authentication failed.";
+                                }
+                                when Socket {
+                                    "An error occured while talking to the server.";
+                                }
+                                when Malloc {
+                                    "There wasn't enough memory to complete the operation.";
+                                }
+                                when Meta {
+                                    "The server returned an error while setting metadata.";
+                                }
+                                when Connected {
+                                    "The connection has already been opened."
+                                }
+                                when Unconnected {
+                                    "The Shout object is not currently connected";
+                                }
+                                when Unsupported {
+                                    "The combination of parameters is not supported for this operation";
+                                }
+                                when Busy {
+                                    "The connection is busy and could not perform the operation.";
+                                }
+                                default {
+                                    "Unknown issue or not an error";
+                                }
 
-            }
+                            }
+            $!what ~ ' : ' ~ $message;
         }
     }
 
@@ -72,20 +74,23 @@ class Audio::Libshout {
 
         sub shout_open(Shout) returns int32 is native('libshout') { * }
 
-        method open() returns Int {
-            shout_open(self);
+        method open() returns Error {
+            my $rc = shout_open(self);
+            Error($rc);
         }
 
         sub shout_close(Shout) returns int32 is native('libshout') { * }
 
-        method close() returns Int {
-            shout_close(self);
+        method close() returns Error {
+            my $rc = shout_close(self);
+            Error($rc);
         }
         
         sub shout_send(Shout, CArray[uint8], int32) returns int32 is native('libshout') { * }
 
-        multi method send(CArray[uint8] $buf) returns int32 {
-            shout_send(self, $buf, $buf.elems);
+        multi method send(CArray[uint8] $buf) returns Error {
+            my $rc = shout_send(self, $buf, $buf.elems);
+            Error($rc);
         }
 
         multi method send(Buf $buf) returns Int {
@@ -110,7 +115,7 @@ class Audio::Libshout {
                 when Success {
                 }
                 default {
-                    X::ShoutError.new(error => $_).throw;
+                    X::ShoutError.new(error => $_, what => "Setting parameter").throw;
                 }
             }
 
@@ -209,8 +214,9 @@ class Audio::Libshout {
 
         sub shout_get_errno(Shout) returns int32 is native('libshout') { * };
 
-        method last-error-number() returns Int {
-            shout_get_errno(self);
+        method last-error-number() returns Error {
+            my $rc = shout_get_errno(self);
+            Error($rc);
         }
     }
 
