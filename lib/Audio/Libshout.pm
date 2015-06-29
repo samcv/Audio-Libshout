@@ -247,6 +247,18 @@ class Audio::Libshout {
 
     has Shout $!shout handles <host port user password protocol format mount dumpfile agent public name url genre description>;
 
+    has Bool $!opened = False;
+
+    method open() {
+        if not $!opened {
+            my $rc = $!shout.open();
+            if $rc !~~ Success {
+                X::ShoutError.new(error => $rc, what => "opening stream").throw;
+            }
+            $!opened = True;
+        }
+    }
+
     sub shout_metadata_new() returns Metadata is native('libshout') { * }
     sub shout_metadata_free(Metadata) is native('libshout') { * }
 
