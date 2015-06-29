@@ -12,7 +12,7 @@ my $user = %*ENV<SHOUT_TEST_USER> // 'source';
 my $pass = %*ENV<SHOUT_TEST_PASS> // 'hackme';
 my $mount = %*ENV<SHOUT_TEST_MOUNT> // '/shout_test';
 
-plan 5;
+plan 10;
 
 if not check-socket($port, $host) {
     diag "not performing live tests as no icecast server";
@@ -40,6 +40,12 @@ throws-like { $obj.open }, rx/"The server refused login, probably because authen
 $obj.password = $pass;
 
 lives-ok { $obj.open }, "open with good password";
+lives-ok { $obj.open }, "open again to check it's safe";
+lives-ok { $obj.close }, "close it";
+lives-ok { $obj.close }, "close it again to check";
+lives-ok { $obj.open }, "open again again to check it's safe";
+lives-ok { $obj.close }, "close it";
+
 
 done;
 

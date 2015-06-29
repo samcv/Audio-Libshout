@@ -259,6 +259,16 @@ class Audio::Libshout {
         }
     }
 
+    method close() {
+        if $!opened {
+            my $rc = $!shout.close();
+            if $rc !~~ Success {
+                X::ShoutError.new(error => $rc, what => "closing stream").throw;
+            }
+            $!opened = False;
+        }
+    }
+
     sub shout_metadata_new() returns Metadata is native('libshout') { * }
     sub shout_metadata_free(Metadata) is native('libshout') { * }
 
