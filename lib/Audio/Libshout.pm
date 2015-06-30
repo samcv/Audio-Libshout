@@ -93,7 +93,7 @@ class Audio::Libshout {
             Error($rc);
         }
 
-        multi method send(Buf $buf) returns Int {
+        multi method send(Buf $buf) returns Error {
             my $carray = CArray[uint8].new;
             $carray[$_] = $buf[$_] for ^$buf.elems;
             self.send($carray);
@@ -256,6 +256,33 @@ class Audio::Libshout {
                 X::ShoutError.new(error => $rc, what => "opening stream").throw;
             }
             $!opened = True;
+        }
+    }
+
+    method send(Buf $buff) {
+        if not $!opened {
+            self.open()
+        }
+        my $rc = $!shout.send($buff);
+        if $rc !~~ Success {
+            X::ShoutError.new(error => $rc, what => "sending data").throw;
+        }
+    }
+
+    method send-channel() {
+        my $channel = Channel.new;
+        start {
+            for $channel.list -> $item {
+                $self.sync;
+                $self.send($item);
+            }
+        }
+        $channel;
+    }
+
+    method sync() {
+        if $!opened {
+            $!shout.sync();
         }
     }
 
