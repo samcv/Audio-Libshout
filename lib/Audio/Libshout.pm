@@ -276,8 +276,13 @@ class Audio::Libshout {
         }
     }
 
-    method send-channel(Audio::Libshout $self:) {
+    multi method send-channel(Audio::Libshout $self:) returns Channel {
         my $channel = Channel.new;
+        $self.send-channel($channel);
+    }
+
+
+    multi method send-channel(Audio::Libshout $self: Channel $channel) returns Channel {
         start {
             for $channel.list -> $item {
                 $self.sync;
