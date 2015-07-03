@@ -62,8 +62,15 @@ class Audio::Libshout {
 
         sub shout_new() returns Shout is native('libshout') { * }
 
-        method new(Shout:U:) returns Shout {
-            shout_new();
+        method new(Shout:U: *%attribs) returns Shout {
+            my $shout = shout_new();
+
+            for %attribs.kv -> $attrib, $value {
+                if $shout.can($attrib) {
+                    $shout."$attrib"() = $value;
+                }
+            }
+            $shout;
         }
 
         sub shout_free(Shout) returns int32 is native('libshout') { * }
@@ -269,7 +276,7 @@ class Audio::Libshout {
         }
     }
 
-    method send-channel() {
+    method send-channel(Audio::Libshout $self:) {
         my $channel = Channel.new;
         start {
             for $channel.list -> $item {
@@ -308,9 +315,9 @@ class Audio::Libshout {
         Version.new($v);
     }
 
-    multi submethod BUILD() {
+    multi submethod BUILD(*%attribs) {
         $initialiser.init();
-        $!shout = Shout.new;
+        $!shout = Shout.new(|%attribs);
     }
 
     submethod DESTROY() {
