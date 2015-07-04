@@ -16,6 +16,7 @@
     "Audio::Libshout" : "lib/Audio/Libshout.pm"
   },
   "depends" : [
+       "AccessorFacade", "OO::Monitors"
   ],
   "test-depends" : [
     "Test",
