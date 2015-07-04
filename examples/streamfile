@@ -4,7 +4,7 @@ use v6;
 
 use Audio::Libshout;
 
-multi sub MAIN(Str :$host = 'localhost', Int :$port = 8000, Str :$user = 'source', Str :$password!, Str :$mount = '/stream', Str :$file!) {
+multi sub MAIN(Str :$host = 'localhost', Int :$port = 8000, Str :$user = 'source', Str :$password!, Str :$mount = '/stream', Str :$file!, *%extra) {
     my $file-io = $file.IO;
 
     if $file-io.f {
@@ -22,7 +22,13 @@ multi sub MAIN(Str :$host = 'localhost', Int :$port = 8000, Str :$user = 'source
 
         my $fh = $file-io.open(:bin);
 
-        my $shout = Audio::Libshout.new(:$host, :$port, :$user, :$password, :$mount, :$format);
+        my $shout = Audio::Libshout.new(:$host, :$port, :$user, :$password, :$mount, :$format, |%extra);
+
+        if $format ~~ Audio::Libshout::Format::MP3 {
+            if %extra<name>:exists {
+                $shout.add-metadata(song => %extra<name>);
+            }
+        }
 
         my $channel = $shout.send-channel;
 

@@ -229,7 +229,7 @@ class Audio::Libshout {
 
         sub shout_set_metadata(Shout, Metadata) returns int32 is native('libshout') { * }
 
-        method set_metadata(Metadata $meta) returns Error {
+        method set-metadata(Metadata $meta) returns Error {
             my $rc = shout_set_metadata(self, $meta);
             Error($rc);
         }
@@ -332,6 +332,29 @@ class Audio::Libshout {
                 X::ShoutError.new(error => $rc, what => "closing stream").throw;
             }
             $!opened = False;
+        }
+    }
+
+    multi method add-metadata(Str $key, Str $value) {
+        my $rc = $!metadata.add($key, $value);
+        if $rc !~~ Success {
+            X::ShoutError.new(error => $rc, what => "adding metadata");
+        }
+    }
+
+    multi method add-metadata(*%metas) {
+        for %metas.kv -> $key, $value {
+            self.add-metadata($key, $value);
+        }
+        self.set-metadata();
+    }
+
+    method set-metadata() {
+        if self.format ~~ MP3 {
+            my $rc = $!shout.set-metadata($!metadata);
+            if $rc !~~ Success {
+                X::ShoutError.new(error => $rc, what => "setting metadata");
+            }
         }
     }
 
