@@ -14,7 +14,7 @@ my $mount = %*ENV<SHOUT_TEST_MOUNT> // '/shout_test';
 
 my $test-data = $*CWD.child('t/data');
 
-plan 15;
+plan 20;
 
 if not check-socket($port, $host) {
     diag "not performing live tests as no icecast server";
@@ -48,29 +48,34 @@ lives-ok { $obj.close }, "close it again to check";
 lives-ok { $obj.open }, "open again again to check it's safe";
 lives-ok { $obj.close }, "close it";
 
-lives-ok { $obj = Audio::Libshout.new(user => $user, password => $pass, host => $host, port => $port, mount => $mount) }, "new to test sending";
+my @tests = { file => 'cw_glitch_noise15.mp3', format => Audio::Libshout::Format::MP3 },
+            { file => 'cw_glitch_noise15.ogg', format => Audio::Libshout::Format::Ogg };
 
-lives-ok { $obj.format = Audio::Libshout::Format::MP3 }, "set format";
+for @tests -> $test {
+    my $obj;
+    lives-ok { $obj = Audio::Libshout.new(user => $user, password => $pass, host => $host, port => $port, mount => $mount) }, "new to test sending " ~ $test<file>;
 
-my $mp3-file = $test-data.child('cw_glitch_noise15.mp3').open(:bin);
+    lives-ok { $obj.format = $test<format> }, "set format to " ~ $test<format>;
 
-my Bool $last = False;
+    my $file = $test-data.child($test<file>).open(:bin);
 
-my $channel;
+    my Bool $last = False;
 
-lives-ok { $channel = $obj.send-channel }, "get send-channel";
+    my $channel;
 
-lives-ok {
-    while not $last {
-        my $tmp_buf = $mp3-file.read(1024);
-        $last = $tmp_buf.elems < 1024;
-        $channel.send($tmp_buf);
-    }
-    $channel.close;
-}, "send data to the channel";
+    lives-ok { $channel = $obj.send-channel }, "get send-channel";
 
-lives-ok { $obj.close }, "close the stream";
+    lives-ok {
+        while not $last {
+            my $tmp_buf = $file.read(1024);
+            $last = $tmp_buf.elems < 1024;
+            $channel.send($tmp_buf);
+        }
+        $channel.close;
+    }, "send data to the channel";
 
+    lives-ok { $obj.close }, "close the stream";
+}
 
 
 done;
