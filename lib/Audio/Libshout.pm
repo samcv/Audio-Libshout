@@ -55,7 +55,27 @@ class Audio::Libshout {
     }
 
     class Metadata is repr('CPointer') {
+        sub shout_metadata_new() returns Metadata is native('libshout') { * }
+
+        method new() {
+            shout_metadata_new();
+        }
+
+        sub shout_metadata_free(Metadata) is native('libshout') { * }
+
+        method DESTROY() {
+            shout_metadata_free(self);
+        }
+
         sub shout_metadata_add(Metadata, Str, Str ) returns int32 is native('libshout') { * }
+
+        method add(Str $key is rw, Str $value is rw) returns Error {
+            explicitly-manage($key);
+            explicitly-manage($value);
+            my $rc = shout_metadata_add(self, $key, $value);
+            Error($rc);
+        }
+
     }
 
     class Shout is repr('CPointer') {
@@ -209,8 +229,9 @@ class Audio::Libshout {
 
         sub shout_set_metadata(Shout, Metadata) returns int32 is native('libshout') { * }
 
-        method set_metadata(Metadata $meta) {
+        method set_metadata(Metadata $meta) returns Error {
             my $rc = shout_set_metadata(self, $meta);
+            Error($rc);
         }
 
         sub shout_get_error(Shout) returns Str is native('libshout') { * };
@@ -253,6 +274,7 @@ class Audio::Libshout {
     my $initialiser = Initialiser.new;
 
     has Shout $!shout handles <host port user password protocol format mount dumpfile agent public name url genre description>;
+    has Metadata $!metadata;
 
     has Bool $!opened = False;
 
@@ -313,8 +335,6 @@ class Audio::Libshout {
         }
     }
 
-    sub shout_metadata_new() returns Metadata is native('libshout') { * }
-    sub shout_metadata_free(Metadata) is native('libshout') { * }
 
     sub shout_version(int32, int32, int32) returns Str is native('libshout') { * }
     method libshout-version() returns Version {
@@ -328,10 +348,12 @@ class Audio::Libshout {
     multi submethod BUILD(*%attribs) {
         $initialiser.init();
         $!shout = Shout.new(|%attribs);
+        $!metadata = Metadata.new;
     }
 
     submethod DESTROY() {
         $!shout = Shout;
+        $!metadata = Metadata;
         $initialiser.shutdown();
     }
 
