@@ -3,7 +3,57 @@ use NativeCall;
 use AccessorFacade:ver<v0.0.2>;
 use OO::Monitors;
 
-class Audio::Libshout {
+=begin pod
+
+=head1 NAME
+
+Audio::Libshout - binding to the xiph.org libshout icecast source client
+
+=head1 SYNOPSIS
+
+=begin code
+
+=end code
+
+See also the files in the C<examples> directory
+
+=head1 DESCRIPTION
+
+This provides a source client to stream to an icecast server.  It can
+stream Ogg/Vorbis or MP3 data but doesn't provide any transcoding so the
+data will need to be provided from an appropriate source in the required
+encoding. This has been developed against version 2.2.2 of libshout,
+it is possible later versions may provide support for other encodings.
+
+The API is somewhat simplified in comparison to libshout but provides
+an asynchronous mechanism whereby data can be fed as quickly as it is
+obtained to a worker thread via a channel so the client doesn't have
+to worry about the timing and synchronisation issues, though the lower
+level send and sync methods are available if your application requires
+a different scheme.
+
+In testing this proved quite capable of streaming a 320kb/s MP3 read from
+a file to an icecast server on the local network, though of course network
+conditions may limit the rate that will work well to remote servers.
+
+The "examples" directory in the distribution contains a simple streaming
+source client that will allow you to send an Ogg or MP3 file to an
+icecast server.
+
+If you're curious the first thing that I streamed using this library was
+
+https://www.mixcloud.com/mikestern-awakening/mike-stern-guest-mix-for-technotic-eire-radio-show/
+
+Mike's a great DJ, great DJs and producers make making software
+worthwhile :)
+
+=head1 METHODS
+
+
+
+=end pod
+
+class Audio::Libshout:ver<v0.0.1>:auth<github:jonathanstowe> {
 
     enum Error ( Success => 0 , Insane => -1 , Noconnect => -2 , Nologin => -3 , Socket => -4 , Malloc => -5, Meta => -6, Connected => -7, Unconnected => -8, Unsupported => -9, Busy => -10 );
     enum Format ( Ogg => 0, MP3 => 1 );
