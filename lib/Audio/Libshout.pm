@@ -256,6 +256,8 @@ class Audio::Libshout {
 
     has Bool $!opened = False;
 
+    has Promise $!helper-promise;
+
     method open() {
         if not $!opened {
             my $rc = $!shout.open();
@@ -283,7 +285,7 @@ class Audio::Libshout {
 
 
     multi method send-channel(Audio::Libshout $self: Channel $channel) returns Channel {
-        start {
+        $!helper-promise = start {
             for $channel.list -> $item {
                 $self.sync;
                 $self.send($item);
@@ -299,6 +301,9 @@ class Audio::Libshout {
     }
 
     method close() {
+        if $!helper-promise.defined {
+            await $!helper-promise;
+        }
         if $!opened {
             my $rc = $!shout.close();
             if $rc !~~ Success {
