@@ -12,7 +12,9 @@ my $user = %*ENV<SHOUT_TEST_USER> // 'source';
 my $pass = %*ENV<SHOUT_TEST_PASS> // 'hackme';
 my $mount = %*ENV<SHOUT_TEST_MOUNT> // '/shout_test';
 
-plan 10;
+my $test-data = $*CWD.child('t/data');
+
+plan 15;
 
 if not check-socket($port, $host) {
     diag "not performing live tests as no icecast server";
@@ -45,6 +47,30 @@ lives-ok { $obj.close }, "close it";
 lives-ok { $obj.close }, "close it again to check";
 lives-ok { $obj.open }, "open again again to check it's safe";
 lives-ok { $obj.close }, "close it";
+
+lives-ok { $obj = Audio::Libshout.new(user => $user, password => $pass, host => $host, port => $port, mount => $mount) }, "new to test sending";
+
+lives-ok { $obj.format = Audio::Libshout::Format::MP3 }, "set format";
+
+my $mp3-file = $test-data.child('cw_glitch_noise15.mp3').open(:bin);
+
+my Bool $last = False;
+
+my $channel;
+
+lives-ok { $channel = $obj.send-channel }, "get send-channel";
+
+lives-ok {
+    while not $last {
+        my $tmp_buf = $mp3-file.read(1024);
+        $last = $tmp_buf.elems < 1024;
+        $channel.send($tmp_buf);
+    }
+    $channel.close;
+}, "send data to the channel";
+
+lives-ok { $obj.close }, "close the stream";
+
 
 
 done;
