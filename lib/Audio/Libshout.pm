@@ -95,15 +95,15 @@ class Audio::Libshout {
         
         sub shout_send(Shout, CArray[uint8], int32) returns int32 is native('libshout') { * }
 
-        multi method send(CArray[uint8] $buf) returns Error {
-            my $rc = shout_send(self, $buf, $buf.elems);
+        multi method send(CArray[uint8] $buf, Int $elems) returns Error {
+            my $rc = shout_send(self, $buf, $elems);
             Error($rc);
         }
 
         multi method send(Buf $buf) returns Error {
             my $carray = CArray[uint8].new;
-            $carray[$_] = $buf[$_] for ^$buf.elems;
-            self.send($carray);
+            $carray[$_] = $buf[$_] for ^($buf.elems);
+            self.send($carray, $buf.elems);
         }
 
         sub shout_sync(Shout) is native('libshout') { * }
@@ -287,8 +287,8 @@ class Audio::Libshout {
     multi method send-channel(Audio::Libshout $self: Channel $channel) returns Channel {
         $!helper-promise = start {
             for $channel.list -> $item {
-                $self.sync;
                 $self.send($item);
+                $self.sync;
             }
         }
         $channel;
