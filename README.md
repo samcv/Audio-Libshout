@@ -18,6 +18,9 @@ In testing this proved quite capable of streaming a 320kb/s MP3 read from a file
 server on the local network, though of course network conditions may limit the rate that will work
 well to remote servers.
 
+The "examples" directory in the distribution contains a simple streaming source client that will
+allow you to send an Ogg or MP3 file to an icecast server.
+
 If you're curious the first thing that I streamed using this library was
 
 https://www.mixcloud.com/mikestern-awakening/mike-stern-guest-mix-for-technotic-eire-radio-show/
