@@ -13,6 +13,21 @@ Audio::Libshout - binding to the xiph.org libshout icecast source client
 
 =begin code
 
+    use Audio::Libshout;
+
+    my $shout = Audio::Libshout.new(password => 'hackme', mount => '/foo', format => Audio::Libshout::Format::MP3);
+    my $fh = @*ARGS[0].IO.open(:bin);
+    my $channel = $shout.send-channel;
+
+    while not $fh.eof {
+	    my $buf = $fh.read(4096);
+	    $channel.send($buf);
+    }
+
+    $fh.close;
+    $channel.close;
+    $shout.close;
+
 =end code
 
 See also the files in the C<examples> directory
@@ -228,7 +243,8 @@ it should only be used if you are using an actual Shoutcast server.
 
 The encoding format that is to be sent as a value of the C<enum> L<Audio::Libshout::Format> - the
 default is C<Ogg>.  No transcoding is done so the data to be sent to the server must be in the
-configured format.  Later versions of C<libshout> might provide for further formats.
+configured format - the result of setting a different format to the actual format of the data is that
+you will get an unreadable stream. Later versions of C<libshout> might provide for further formats.
 
 =item MP3
 
