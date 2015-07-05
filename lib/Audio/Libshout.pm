@@ -49,7 +49,146 @@ worthwhile :)
 
 =head1 METHODS
 
+=head2 method new
 
+    method new(*%params) returns Audio::Libshout
+
+The object constructor can be passed any of the parameters described in L<STREAM PARAMETERS>.
+It may throw an L<X::ShoutError> if there was a problem initialising the library or setting any
+of the parameters.
+
+The L<Audio::Libshout> object returned will be initialised but not connected to the server, the
+connection should be made before any data is sent to the server.
+
+=head2 method open
+
+    method open()
+
+If the stream is not already connected this will open the stream so that data can be sent. 
+The C<host>, C<port>, C<user> and C<password> and other parameters that may be required by
+the protocol must be set before calling C<open>.  If a connection cannot be made to the server
+or the server refuses the connection (e.g. due to an authentication failure,) a L<X::ShoutError>
+will be thrown.
+
+This will be called for you the first time that C<send> is called or the first data is sent to the
+C<send-channel> however you may wish to call it early in order to detect and rectify any problems.
+
+=head2 method close
+
+    method close()
+
+This will close the connection to the server.  It will wait for the worker thread that is started by
+C<send-channel> to complete, which will not happen until the L<Channel> is closed so you should always
+call C<close> on the channel to indicate that no more data will be sent.
+
+=head2 method send
+
+=head2 method sync
+
+=head2 method send-channel
+
+=head2 add-metadata
+
+=head2 libshout-version
+
+=head1 STREAM PARAMETERS
+
+These can all be supplied to the constructor as named arguments or set as attributes on
+a new object, some provide sensible defaults which are noted and some are required and
+must be set before the stream is opened. Setting a parameter that doesn't make sense given
+the state of the stream or already set parameters will result in a L<X::ShoutError> being
+thrown.
+
+=head2 host 
+
+The hostname or IP address of the streaming server.  The default is 'localhost'.
+
+=head2 port 
+
+The port number on which the server is listening.  The default is 8000
+
+=head2 user 
+
+The username that is used to authenticate against the server, the default is 'source'.
+If the C<protocol> is set to C<ICY> then setting this makes no sense as 'source' is
+always used.
+
+=head2 password 
+
+The password that is used to authenticate with the server.  There is no default and this
+must be provided before connecting.
+
+=head2 protocol 
+
+A value of the C<enum> L<Audio::Libshout::Protocol> indicating which protocol should be used
+to communicate with the server:
+
+=item HTTP
+
+This is the Icecast v2 protocol and the default, this should be used unless there is a 
+compelling reason to do otherwise.
+
+=item XAUDIOCAST
+
+The protocol used by version 1 of Icecast.
+
+=item ICY
+
+The Shoutcast protocol. If this is used then there are certain constraints on other parameters,
+it should only be used if you are using an actual Shoutcast server.
+
+=head2 format 
+
+The encoding format that is to be sent as a value of the C<enum> L<Audio::Libshout::Format> - the
+default is C<Ogg>.  No transcoding is done so the data to be sent to the server must be in the
+configured format.  Later versions of C<libshout> might provide for further formats.
+
+=item MP3
+
+=item Ogg
+
+=head2 mount 
+
+The "mount point" (i.e. the path part ) on the server that represents this stream. There is no
+default. The C<ICY> protocol does not support setting this. On setting this will be "normalised"
+with a leading '/' (e.g. setting "stream" will return "/stream".)
+
+=head2 dumpfile 
+
+This can be set to cause an archive of the stream to be made on the server with the provided name.
+The server may not support this (or may configured to allow it.)  The resulting file will be at
+least as large as the streamed data and if the server runs out of disk space it may interrupt the
+stream, so think carefully before using this.
+
+=head2 agent 
+
+This is the UserAgent header that is sent for the C<HTTP> protocol.  The default is "libshout/$version".
+
+=head2 public 
+
+This is a L<Bool> that indicates whether the server should list the stream in any directory services that
+it has configured. The default is C<False>.
+
+
+=head2 name 
+
+The stream name that should be used in a directory listing. This may also be passed on to connected clients.
+There is no default.
+
+=head2 url 
+
+The stream URL that should be used in a directory listing. This may also be passed on to connected clients.
+There is no default.
+
+=head2 genre 
+
+The genre of the stream that should be used in a directory listing. This may also be passed on to connected clients.
+There is no default.
+
+=head2 description
+
+A description of the stream that should be used in a directory listing. This may also be passed on to connected clients.
+There is no default.
 
 =end pod
 
