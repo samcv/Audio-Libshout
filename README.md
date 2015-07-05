@@ -46,6 +46,16 @@ https://github.com/xiph/Icecast-libshout
 I am however unlikely to be able to offer help with installing it this way, also bear in mind that
 if you install a newer version than I have to test with then this may not work.
 
+In order to perform some of the tests you will need to have a working Icecast server available,
+these tests will be skipped if one isn't found.  The tests use some default values for the server
+parameters that can be over-written by some environment variables:
+
+   * SHOUT_TEST_HOST - the host to connect to. The default is 'localhost'
+   * SHOUT_TEST_PORT - the port to connect to. The default is 8000.
+   * SHOUT_TEST_USER - the user to authenticate as. The default is 'source'.
+   * SHOUT_TEST_PASS - the password to authenticate with.  The default is 'hackme' but you changed that right?
+   * SHOUT_TEST_MOUNT - the mount point on the server to use.  The default is '/shout_test'
+
 Assuming you have a working perl6 installation you should be able to
 install this with *ufo* :
 
