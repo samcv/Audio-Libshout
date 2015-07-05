@@ -53,51 +53,138 @@ worthwhile :)
 
     method new(*%params) returns Audio::Libshout
 
-The object constructor can be passed any of the parameters described in L<STREAM PARAMETERS>.
-It may throw an L<X::ShoutError> if there was a problem initialising the library or setting any
-of the parameters.
+The object constructor can be passed any of the parameters described in
+L<STREAM PARAMETERS>.  It may throw an L<X::ShoutError> if there was a
+problem initialising the library or setting any of the parameters.
 
-The L<Audio::Libshout> object returned will be initialised but not connected to the server, the
-connection should be made before any data is sent to the server.
+The L<Audio::Libshout> object returned will be initialised but not
+connected to the server, the connection should be made before any data
+is sent to the server.
 
 =head2 method open
 
     method open()
 
-If the stream is not already connected this will open the stream so that data can be sent. 
-The C<host>, C<port>, C<user> and C<password> and other parameters that may be required by
-the protocol must be set before calling C<open>.  If a connection cannot be made to the server
-or the server refuses the connection (e.g. due to an authentication failure,) a L<X::ShoutError>
-will be thrown.
+If the stream is not already connected this will open the stream so
+that data can be sent.  The C<host>, C<port>, C<user> and C<password>
+and other parameters that may be required by the protocol must be set
+before calling C<open>.  If a connection cannot be made to the server or
+the server refuses the connection (e.g. due to an authentication failure,)
+a L<X::ShoutError> will be thrown.
 
-This will be called for you the first time that C<send> is called or the first data is sent to the
-C<send-channel> however you may wish to call it early in order to detect and rectify any problems.
+This will be called for you the first time that C<send> is called or
+the first data is sent to the C<send-channel> however you may wish to
+call it early in order to detect and rectify any problems.
 
 =head2 method close
 
     method close()
 
-This will close the connection to the server.  It will wait for the worker thread that is started by
-C<send-channel> to complete, which will not happen until the L<Channel> is closed so you should always
-call C<close> on the channel to indicate that no more data will be sent.
+This will close the connection to the server.  It will wait for the worker
+thread that is started by C<send-channel> to complete, which will not
+happen until the L<Channel> is closed so you should always call C<close>
+on the channel to indicate that no more data will be sent.
 
 =head2 method send
 
+    method send(Buf $buf)
+
+This will send the L<Buf> of unsigned chars (L<uint8>,) to the
+server. The buffer must contain data encoded as per that set for C<format>
+(i.e. either C<Ogg> or C<MP3> ) If there is a problem sending the data to
+the server then a L<X::ShoutError> will be thrown.  If C<open> has not
+already been called it will be called for you and this may also throw an
+exception. The data will be sent immediately so C<sync> should be called
+between each attempt to send or an exception may be thrown indicating
+that the server is busy.
+
+If you don't want to be concerned with the synchronisation issues then you
+should consider the asynchronous interface provided by C<send-channel>.
+
+
 =head2 method sync
 
+    method sync()
+
+This will block the thread of execution until the server is ready to
+accept new data.  It should be called between each call to C<send> in
+order to maintain the rate of data transfer correctly.  A C<send> that
+is made without a preceding C<sync> may throw an exception indicating
+that the server is busy.
+
+If you don't want to be concerned with the synchronisation issues then you
+should consider the asynchronous interface provided by C<send-channel>.
+
 =head2 method send-channel
+    
+    multi method send-channel() returns Channel
+    multi method send-channel(Channel $channel) returns Channel
+
+This provides an asynchronous mechanism that allows a client to send
+data to a L<Channel> as it becomes available, being processed by a
+helper thread that will take care of the synchronisation.  This should
+be considered the preferred interface for most applications.
+
+If C<open> has not already been called then it will be done for you the
+first time that data is received on the L<Channel>, as with C<open> an
+exception will be thrown if a connection cannot be made or the server
+refuses the connection.
+
+As with C<send> the data sent to the L<Channel> should be a L<Buf>
+of unsigned chars (L<uint8>). If data of another type is sent on the
+channel then an exception will be thrown in the worker thread.
+
+This can be provided with an existing L<Channel> that may be useful if
+the data originates from another asynchronous source for example.
+
+The worker thread will be started immediately that this method is called
+and will remain active until the channel is closed, consequently a
+subsequent call to C<close> will wait until the thread is finished to
+allow all the sent data to be transmitted to the server.
+
+The "streamfile" program in the repository provides an example of the
+use of this interface.
 
 =head2 add-metadata
 
+   multi method add-metadata(Str $key, Str $value)
+   multi method add-metadata(*%metas)
+
+This provides a means to set the metadata on the stream, it only works
+for streams of format C<MP3>. The exact meaning of any particular metadata
+item is specific to the client of the stream.
+
+The metadata items are added to or updated in a private metadata
+structure, that can be applied to the stream with C<set-metadata>, for
+convenience if the metadata is supplied in the second form (i.e like
+named arguments,) this will be done for you.
+
+This may throw a L<X::ShoutError> if the metadata structure is invalid.
+
+=head2 set-metadata
+
+    method set-metadata()
+
+This will send the metadata as added or updated by C<add-metadata> to
+the connected stream. This will only work if the format of the stream
+is C<MP3>.
+
+It will throw a L<X::ShoutError> if an error is encountered while setting
+the metadata.
+
 =head2 libshout-version
+
+This will return a L<Version> object that represents the version of the
+C<libshout> that is being used.
 
 =head1 STREAM PARAMETERS
 
-These can all be supplied to the constructor as named arguments or set as attributes on
-a new object, some provide sensible defaults which are noted and some are required and
-must be set before the stream is opened. Setting a parameter that doesn't make sense given
-the state of the stream or already set parameters will result in a L<X::ShoutError> being
-thrown.
+These can all be supplied to the constructor as named arguments or set
+as attributes on a new object, some provide sensible defaults which
+are noted and some are required and must be set before the stream is
+opened. Setting a parameter that doesn't make sense given the state of
+the stream or already set parameters will result in a L<X::ShoutError>
+being thrown.
 
 =head2 host 
 
