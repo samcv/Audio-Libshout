@@ -1,7 +1,4 @@
 use v6;
-use NativeCall;
-use AccessorFacade:ver<v0.0.2>;
-use OO::Monitors;
 
 =begin pod
 
@@ -309,6 +306,9 @@ There is no default.
 =end pod
 
 class Audio::Libshout:ver<v0.0.2>:auth<github:jonathanstowe> {
+    use NativeCall;
+    use AccessorFacade:ver<v0.0.2>;
+    use OO::Monitors;
 
     # encapsulate (bytes, count) in a type safe way
     subset RawEncode of Array where  ($_.elems == 2 ) && ($_[0] ~~ CArray[uint8]) && ($_[1] ~~ Int);
@@ -691,6 +691,9 @@ class Audio::Libshout:ver<v0.0.2>:auth<github:jonathanstowe> {
     }
 
     multi submethod BUILD(*%attribs) {
+        if not $initialiser.defined {
+            $initialiser = Initialiser.new;
+        }
         $initialiser.init();
         $!shout = Shout.new(|%attribs);
         $!metadata = Metadata.new;
