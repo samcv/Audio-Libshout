@@ -102,7 +102,9 @@ on the channel to indicate that no more data will be sent.
 
 =head2 method send
 
-    method send(Buf $buf)
+    multi method send(Buf $buf)
+    multi method send(CArray[uint8], Int $bytes);
+    multi method send(RawEncode $raw);
 
 This will send the L<Buf> of unsigned chars (L<uint8>,) to the
 server. The buffer must contain data encoded as per that set for C<format>
@@ -112,6 +114,15 @@ already been called it will be called for you and this may also throw an
 exception. The data will be sent immediately so C<sync> should be called
 between each attempt to send or an exception may be thrown indicating
 that the server is busy.
+
+The second multi variant is intended to make interoperation with other
+libraries which may return encoded data in a C<CArray>.  The third
+is similar but accepts an C<Array> of two elements the first being
+a C<CArray[uint8]> and the second an C<Int> which is the number of
+bytes in the array, this reflects the return value of the C<encode>
+methods of L<Audio::Encode::LameMP3> with the C<:raw> adverb. This
+is intended to reduce the marshalling required when there is no
+need to have the data in perl space.
 
 If you don't want to be concerned with the synchronisation issues then you
 should consider the asynchronous interface provided by C<send-channel>.
@@ -147,7 +158,9 @@ refuses the connection.
 
 As with C<send> the data sent to the L<Channel> should be a L<Buf>
 of unsigned chars (L<uint8>). If data of another type is sent on the
-channel then an exception will be thrown in the worker thread.
+channel then an exception will be thrown in the worker thread. The data
+can also be Array of two elements: a C<CArray[uint8]> and an C<Int> that
+is the number of bytes in that C<CArray> as described under C<send> above.
 
 This can be provided with an existing L<Channel> that may be useful if
 the data originates from another asynchronous source for example.
