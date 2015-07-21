@@ -295,7 +295,10 @@ There is no default.
 
 =end pod
 
-class Audio::Libshout:ver<v0.0.1>:auth<github:jonathanstowe> {
+class Audio::Libshout:ver<v0.0.2>:auth<github:jonathanstowe> {
+
+    # encapsulate (bytes, count) in a type safe way
+    subset RawEncode of Array where  ($_.elems == 2 ) && ($_[0] ~~ CArray[uint8]) && ($_[1] ~~ Int);
 
     enum Error ( Success => 0 , Insane => -1 , Noconnect => -2 , Nologin => -3 , Socket => -4 , Malloc => -5, Meta => -6, Connected => -7, Unconnected => -8, Unsupported => -9, Busy => -10 );
     enum Format ( Ogg => 0, MP3 => 1 );
@@ -582,7 +585,7 @@ class Audio::Libshout:ver<v0.0.1>:auth<github:jonathanstowe> {
         }
     }
 
-    method send(Buf $buff) {
+    multi method send(Buf $buff) {
         if not $!opened {
             self.open()
         }
@@ -590,6 +593,20 @@ class Audio::Libshout:ver<v0.0.1>:auth<github:jonathanstowe> {
         if $rc !~~ Success {
             X::ShoutError.new(error => $rc, what => "sending data").throw;
         }
+    }
+
+    multi method send(CArray[uint8] $buff, Int $bytes) {
+        if not $!opened {
+            self.open()
+        }
+        my $rc = $!shout.send($buff, $bytes);
+        if $rc !~~ Success {
+            X::ShoutError.new(error => $rc, what => "sending data").throw;
+        }
+    }
+
+    multi method send(RawEncode $raw) {
+        self.send($raw[0], $raw[1]);
     }
 
     multi method send-channel(Audio::Libshout $self:) returns Channel {
