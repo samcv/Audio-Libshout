@@ -2,16 +2,16 @@
 
 use v6;
 
+use AccessorFacade;
+use Audio::Encode::LameMP3;
 use Audio::Libshout;
 use Audio::Sndfile;
-use Audio::Encode::LameMP3;
 
 multi sub MAIN(Str :$host = 'localhost', Int :$port = 8000, Str :$user = 'source', Str :$password!, Int :$bitrate = 128, Int :$quality = 5, Int :$bufsize = 512, Str :$mount = '/stream', Str :$file!, *%extra) {
     my $file-io = $file.IO;
 
     my $format = Audio::Libshout::Format::MP3;
     my $sndfile = Audio::Sndfile.new(filename => $file, :r);
-    say "sndfile";
 
     my $mode = do given $sndfile.channels {
         when 2 {
