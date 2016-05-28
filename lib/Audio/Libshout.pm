@@ -305,7 +305,7 @@ There is no default.
 
 =end pod
 
-class Audio::Libshout:ver<0.0.8>:auth<github:jonathanstowe> {
+class Audio::Libshout:ver<0.0.9>:auth<github:jonathanstowe> {
     use NativeCall;
     use AccessorFacade;
 
