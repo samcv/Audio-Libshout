@@ -2,6 +2,8 @@
 
 Perl 6 binding to libshout - provide icecast/streaming client
 
+[![Build Status](https://travis-ci.org/jonathanstowe/Audio-Libshout.svg?branch=master)](https://travis-ci.org/jonathanstowe/Audio-Libshout)
+
 ## Description
 
 This provides a source client to stream to an icecast server.  It can
