@@ -60,18 +60,8 @@ parameters that can be over-written by some environment variables:
    * SHOUT_TEST_PASS - the password to authenticate with.  The default is 'hackme' but you changed that right?
    * SHOUT_TEST_MOUNT - the mount point on the server to use.  The default is '/shout_test'
 
-Assuming you have a working perl6 installation you should be able to
-install this with *ufo* :
-
-    ufo
-    make test
-    make install
-
-*ufo* can be installed with *panda* for rakudo:
-
-    panda install ufo
-
-Or you can install directly with "panda":
+Assuming you have a working Rakudo Perl 6 installation you should be able to
+install this with *panda* :
 
     # From the source directory
    
@@ -81,7 +71,7 @@ Or you can install directly with "panda":
 
     panda install Audio::Libshout
 
-Other install mechanisms may be become available in the future.
+This should work equally well with *zef* but I haven't tested it.
 
 ## Support
 
@@ -99,4 +89,4 @@ with your streaming configuration.
 
 Please see the [LICENCE](LICENCE) file in the distribution
 
-© Jonathan Stowe 2015, 2016
+© Jonathan Stowe 2015, 2016, 2017
